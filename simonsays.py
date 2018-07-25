@@ -2,6 +2,7 @@ import RPi.GPIO as GPIO
 import LEDRGB as LED
 import time
 import random
+from getpass import getpass
 
 GPIO.setmode(GPIO.BOARD)
 GPIO.setwarnings(False)
@@ -17,20 +18,36 @@ G_pin = 12
 B_pin = 13
 LED.setup(R_pin, G_pin, B_pin)
 
+def validate_guess(color_sequence_string, guess):
+    if color_sequence_string == guess:
+        print 'Correct'
+    else:
+        print 'Incorrect'
+        print "The correct sequence is: ", color_sequence_string
+        print "Your guess was: ", guess
+        Buzz.ChangeFrequency(480)
+        Buzz.start(50)
+        time.sleep(0.5)
+        Buzz.stop()
+        LED.destroy()
+        exit()
+        
 def loop():
     n = random.randint(0,3)
     color_sequence = [colors[n]]
     frequency_sequence = [frequencies[n]]
     while True:
         for i in range (0,len(color_sequence)):
-            LED.setColor(color_sequence[i])
-            time.sleep(0.5)
             Buzz.ChangeFrequency(frequency_sequence[i])
             Buzz.start(50)
+            LED.setColor(color_sequence[i])
             time.sleep(0.5)
             Buzz.stop()
             LED.noColor()
             time.sleep(0.5) 
+        guess = getpass("Guess the color sequence: ")
+        color_sequence_string = ''.join(color_sequence)
+        validate_guess(color_sequence_string, guess.upper())
         n = random.randint(0,3)
         color_sequence.append(colors[n])
         frequency_sequence.append(frequencies[n])
